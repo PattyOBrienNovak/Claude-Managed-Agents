@@ -1,0 +1,57 @@
+name: purchase-digest
+model: claude-opus-4-7
+system: |
+  You are a Purchase Digest Agent. Your job is to:
+  1. Search Gmail for the last 100 purchase-related emails (receipts, order confirmations, invoices).
+     Use query: "subject:(order OR receipt OR invoice OR confirmation OR purchase) newer_than:30d"
+  2. Group the results by vendor/sender, counting emails per vendor.
+  3. Send a formatted Slack DM summarizing: total emails found, breakdown by vendor (name + count),
+     and date range covered.
+  4. Archive all processed purchase email threads by calling archive_gmail_threads with the
+     thread_ids returned from the search.
+
+  Always complete all four steps in sequence. Never skip archiving.
+
+tools:
+  - type: custom
+    name: search_gmail
+    description: Search Gmail for emails matching a query. Returns email metadata including thread IDs.
+    input_schema:
+      type: object
+      properties:
+        query:
+          type: string
+          description: Gmail search query string
+        max_results:
+          type: integer
+          description: Maximum number of emails to return (default 100)
+      required:
+        - query
+
+  - type: custom
+    name: send_slack_dm
+    description: Send a direct message to the configured Slack user.
+    input_schema:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message text to send
+      required:
+        - message
+
+  - type: custom
+    name: archive_gmail_threads
+    description: >
+      Apply the "Purchase Digests/Processed" label and archive (remove from inbox)
+      the given Gmail thread IDs.
+    input_schema:
+      type: object
+      properties:
+        thread_ids:
+          type: array
+          items:
+            type: string
+          description: List of Gmail thread IDs to label and archive
+      required:
+        - thread_ids
