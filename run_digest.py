@@ -14,6 +14,9 @@ Requires gmail_token.json in the working directory (run setup_gmail_auth.py firs
 import json
 import os
 
+from dotenv import load_dotenv
+load_dotenv()
+
 import anthropic
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
@@ -93,7 +96,7 @@ def handle_archive_gmail_threads(tool_input: dict) -> str:
     service = get_gmail_service()
     thread_ids: list[str] = tool_input.get("thread_ids", [])
 
-    label_id = get_or_create_label(service, "Purchase Digests/Processed")
+    label_id = get_or_create_label(service, "Purchase Digest/Processed")
 
     archived = 0
     errors = []
@@ -111,7 +114,7 @@ def handle_archive_gmail_threads(tool_input: dict) -> str:
     return json.dumps(
         {
             "archived": archived,
-            "label": "Purchase Digests/Processed",
+            "label": "Purchase Digest/Processed",
             "errors": errors,
         }
     )
@@ -150,18 +153,23 @@ def run_digest():
         )
 
         tool_calls = []
+        agent_started = False
         for event in stream:
             if event.type == "agent.message":
+                agent_started = True
                 for block in event.content:
                     if block.type == "text":
                         print(block.text, end="", flush=True)
             elif event.type == "agent.custom_tool_use":
+                agent_started = True
                 print(f"\n[Tool: {event.name}]")
                 tool_calls.append(event)
+            elif event.type == "session.error":
+                print(f"\n[ERROR] {event}", flush=True)
             elif event.type == "session.status_terminated":
                 print("\nSession terminated.")
                 return
-            elif event.type == "session.status_idle":
+            elif event.type == "session.status_idle" and agent_started:
                 break
 
     # Outer loop: keep running until there are no more pending tool calls
