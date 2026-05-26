@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Purchase Digest Agent</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --purple: #7C3AED;
+      --purple-light: #A78BFA;
+      --pink: #EC4899;
+      --teal: #0D9488;
+      --teal-light: #2DD4BF;
+      --amber: #F59E0B;
+      --bg: #0F0F1A;
+      --bg2: #16162A;
+      --bg3: #1E1E38;
+      --text: #F1F0FF;
+      --muted: #A09EC0;
+      --border: #2E2E50;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      background: linear-gradient(135deg, #0F0F1A 0%, #1A0A2E 50%, #0F1A1A 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 80px 24px 72px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 20% 50%, rgba(124,58,237,0.18) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 35% at 80% 50%, rgba(13,148,136,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--teal-light);
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.4rem, 6vw, 4rem);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      background: linear-gradient(90deg, var(--purple-light), var(--pink), var(--teal-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 24px;
+    }
+
+    .hero-tagline {
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      color: var(--muted);
+      max-width: 580px;
+      margin: 0 auto 36px;
+    }
+
+    .hero-tagline em {
+      color: var(--text);
+      font-style: normal;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      border: 1px solid;
+    }
+
+    .badge-gmail   { border-color: #EA4335; color: #EA4335; background: rgba(234,67,53,0.08); }
+    .badge-slack   { border-color: #E01E5A; color: #E01E5A; background: rgba(224,30,90,0.08); }
+    .badge-claude  { border-color: var(--purple-light); color: var(--purple-light); background: rgba(124,58,237,0.1); }
+    .badge-python  { border-color: #4B9CD3; color: #4B9CD3; background: rgba(75,156,211,0.08); }
+
+    /* ── Sections ── */
+    section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 72px 24px;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .section-label.purple { color: var(--purple-light); }
+    .section-label.pink   { color: var(--pink); }
+    .section-label.teal   { color: var(--teal-light); }
+
+    .section-title {
+      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      margin-bottom: 12px;
+    }
+
+    .section-subtitle {
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 600px;
+      margin-bottom: 48px;
+    }
+
+    /* ── Flow Steps ── */
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0;
+      position: relative;
+    }
+
+    .flow-item {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 24px;
+      position: relative;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .flow-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    .flow-item + .flow-item {
+      margin-left: -1px;
+    }
+
+    .flow-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 14px;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+
+    .step-1 .flow-number { background: rgba(124,58,237,0.2); color: var(--purple-light); }
+    .step-2 .flow-number { background: rgba(236,72,153,0.2); color: var(--pink); }
+    .step-3 .flow-number { background: rgba(245,158,11,0.2); color: var(--amber); }
+    .step-4 .flow-number { background: rgba(13,148,136,0.2); color: var(--teal-light); }
+
+    .step-1 { border-top: 3px solid var(--purple); }
+    .step-2 { border-top: 3px solid var(--pink); }
+    .step-3 { border-top: 3px solid var(--amber); }
+    .step-4 { border-top: 3px solid var(--teal); }
+
+    .flow-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .flow-desc {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .flow-arrows {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin: 24px 0 0;
+      flex-wrap: wrap;
+    }
+
+    .flow-arrows span {
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--bg3);
+      color: var(--muted);
+    }
+
+    .arrow { color: var(--border); font-size: 1.1rem; }
+
+    .footnote {
+      margin-top: 24px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .footnote::before {
+      content: "✦";
+      color: var(--teal-light);
+    }
+
+    /* ── Learning Cards ── */
+    .learn-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+    }
+
+    .learn-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 24px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .learn-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    .learn-card::before {
+      content: "";
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 4px;
+      border-radius: 16px 0 0 16px;
+    }
+
+    .learn-card.c-purple::before { background: var(--purple); }
+    .learn-card.c-pink::before   { background: var(--pink); }
+    .learn-card.c-amber::before  { background: var(--amber); }
+    .learn-card.c-teal::before   { background: var(--teal); }
+
+    .learn-icon {
+      font-size: 1.6rem;
+      margin-bottom: 14px;
+      display: block;
+    }
+
+    .learn-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .learn-plain {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 16px;
+      line-height: 1.55;
+    }
+
+    .tech-callout {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.78rem;
+      font-family: "SF Mono", "Fira Code", "Cascadia Code", Consolas, monospace;
+      color: var(--teal-light);
+      line-height: 1.5;
+    }
+
+    .tech-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 4px;
+      font-family: inherit;
+    }
+
+    /* ── Roadmap ── */
+    .roadmap {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .road-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 24px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .road-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    .road-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-bottom: 16px;
+    }
+
+    .road-tag.v2 { background: rgba(124,58,237,0.2); color: var(--purple-light); }
+    .road-tag.v3 { background: rgba(236,72,153,0.2); color: var(--pink); }
+    .road-tag.v4 { background: rgba(245,158,11,0.2); color: var(--amber); }
+
+    .road-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .road-desc {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .road-skill {
+      margin-top: 16px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .road-skill::before {
+      content: "→";
+      color: var(--purple-light);
+      flex-shrink: 0;
+    }
+
+    .road-closing {
+      margin-top: 40px;
+      text-align: center;
+      font-size: 1rem;
+      color: var(--muted);
+      font-style: italic;
+      padding: 24px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--bg2);
+    }
+
+    .road-closing strong {
+      color: var(--text);
+      font-style: normal;
+    }
+
+    /* ── Divider ── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0;
+    }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 40px 24px;
+      font-size: 0.82rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .flow { grid-template-columns: 1fr; }
+      .flow-item + .flow-item { margin-left: 0; margin-top: -1px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Hero ── -->
+  <div class="hero">
+    <p class="hero-eyebrow">Women Defining AI &mdash; Learning in Public</p>
+    <h1>Purchase Digest Agent</h1>
+    <p class="hero-tagline">
+      An AI agent that <em>reads my inbox</em>, writes me a summary,
+      and <em>cleans everything up</em> &mdash; automatically.
+    </p>
+    <div class="badge-row">
+      <span class="badge badge-gmail">&#9993; Gmail</span>
+      <span class="badge badge-slack">&#9670; Slack</span>
+      <span class="badge badge-claude">&#10022; Claude AI</span>
+      <span class="badge badge-python">&#11835; Python</span>
+    </div>
+  </div>
+
+  <!-- ── What It Does ── -->
+  <section>
+    <p class="section-label purple">Section 01</p>
+    <h2 class="section-title">What It Does</h2>
+    <p class="section-subtitle">
+      One command kicks off four steps, all handled by the agent without any manual work.
+    </p>
+
+    <div class="flow">
+      <div class="flow-item step-1">
+        <div class="flow-number">1</div>
+        <div class="flow-title">Search</div>
+        <div class="flow-desc">
+          Scans Gmail for receipts, order confirmations, and invoices that are older than 30 days &mdash;
+          up to 100 threads at a time.
+        </div>
+      </div>
+      <div class="flow-item step-2">
+        <div class="flow-number">2</div>
+        <div class="flow-title">Summarize</div>
+        <div class="flow-desc">
+          Groups the emails by vendor or sender and counts how many came from each one.
+        </div>
+      </div>
+      <div class="flow-item step-3">
+        <div class="flow-number">3</div>
+        <div class="flow-title">Notify</div>
+        <div class="flow-desc">
+          Sends me a direct Slack message with a clean, formatted digest &mdash;
+          total count, vendor breakdown, date range.
+        </div>
+      </div>
+      <div class="flow-item step-4">
+        <div class="flow-number">4</div>
+        <div class="flow-title">Archive</div>
+        <div class="flow-desc">
+          Moves every processed thread out of the inbox into a
+          &ldquo;Purchase Digest / Processed&rdquo; folder for safe keeping.
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-arrows">
+      <span>Search Gmail</span>
+      <span class="arrow">&rarr;</span>
+      <span>Group by vendor</span>
+      <span class="arrow">&rarr;</span>
+      <span>Send Slack DM</span>
+      <span class="arrow">&rarr;</span>
+      <span>File away</span>
+    </div>
+
+    <p class="footnote">No email is deleted &mdash; just neatly filed away.</p>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ── What I'm Learning ── -->
+  <section>
+    <p class="section-label pink">Section 02</p>
+    <h2 class="section-title">What I&rsquo;m Learning: Managed Agents</h2>
+    <p class="section-subtitle">
+      This project uses Anthropic&rsquo;s Managed Agents SDK &mdash; a way to deploy AI agents
+      that run in the cloud and call tools on demand. Here&rsquo;s what I&rsquo;m building fluency with right now.
+    </p>
+
+    <div class="learn-grid">
+
+      <div class="learn-card c-purple">
+        <span class="learn-icon">&#128196;</span>
+        <div class="learn-title">Defining an Agent</div>
+        <p class="learn-plain">
+          Writing the agent&rsquo;s job description: what it knows, what its goals are,
+          and what tools it&rsquo;s allowed to use.
+        </p>
+        <div class="tech-callout">
+          <div class="tech-label">For the coders</div>
+          YAML file with system prompt + tool schemas &mdash; deployed once, reused every run.
+        </div>
+      </div>
+
+      <div class="learn-card c-pink">
+        <span class="learn-icon">&#128260;</span>
+        <div class="learn-title">Custom Tool Loop</div>
+        <p class="learn-plain">
+          The agent lives in the cloud but it can&rsquo;t touch my Gmail or Slack directly.
+          So it asks my laptop to do those things and waits for the answer.
+        </p>
+        <div class="tech-callout">
+          <div class="tech-label">For the coders</div>
+          Event stream &rarr; intercept tool call &rarr; execute locally &rarr; return result &rarr; repeat.
+        </div>
+      </div>
+
+      <div class="learn-card c-amber">
+        <span class="learn-icon">&#128246;</span>
+        <div class="learn-title">Sessions &amp; Streaming</div>
+        <p class="learn-plain">
+          The agent and my script stay in a live back-and-forth conversation
+          until all the work is done &mdash; like a real-time phone call between them.
+        </p>
+        <div class="tech-callout">
+          <div class="tech-label">For the coders</div>
+          sessions.create() opens the call &mdash; events.stream() keeps it alive.
+        </div>
+      </div>
+
+      <div class="learn-card c-teal">
+        <span class="learn-icon">&#128274;</span>
+        <div class="learn-title">Credential Split</div>
+        <p class="learn-plain">
+          My passwords and API keys never leave my machine. The AI handles the thinking;
+          my laptop handles anything that needs a secret.
+        </p>
+        <div class="tech-callout">
+          <div class="tech-label">For the coders</div>
+          Gmail OAuth token + Slack bot token stay local. Agent never sees them.
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ── What's Next ── -->
+  <section>
+    <p class="section-label teal">Section 03</p>
+    <h2 class="section-title">What&rsquo;s Next &mdash; Growing with Managed Agents</h2>
+    <p class="section-subtitle">
+      Each version adds one new capability. The goal is building confidence, not complexity.
+    </p>
+
+    <div class="roadmap">
+
+      <div class="road-card">
+        <span class="road-tag v2">Version 2</span>
+        <div class="road-title">Remote Triggering</div>
+        <p class="road-desc">
+          Right now I have to run a script on my laptop to kick things off.
+          The next step is setting up a schedule so the agent wakes up on its own &mdash;
+          no laptop required.
+        </p>
+        <p class="road-skill">
+          New skill: triggering an agent remotely via a cron schedule or webhook.
+        </p>
+      </div>
+
+      <div class="road-card">
+        <span class="road-tag v3">Version 3</span>
+        <div class="road-title">Memory Across Runs</div>
+        <p class="road-desc">
+          Today the agent starts fresh every time. A future version will remember
+          what it already processed, so the digest gets smarter and avoids
+          surfacing the same emails twice.
+        </p>
+        <p class="road-skill">
+          New skill: giving an agent persistent memory between sessions.
+        </p>
+      </div>
+
+      <div class="road-card">
+        <span class="road-tag v4">Version 4</span>
+        <div class="road-title">Richer Workflows</div>
+        <p class="road-desc">
+          Once the basics are solid: spending trends, category breakdowns,
+          maybe a budget alert when a vendor&rsquo;s total crosses a threshold.
+        </p>
+        <p class="road-skill">
+          New skill: multi-step reasoning with conditional logic and richer output formats.
+        </p>
+      </div>
+
+    </div>
+
+    <p class="road-closing">
+      <strong>One new thing at a time.</strong>
+      Each version of this project teaches one new Managed Agents concept &mdash;
+      then I move on. That&rsquo;s the whole strategy.
+    </p>
+
+  </section>
+
+  <footer>
+    Built by Patty O&rsquo;Brien Novak &mdash; Women Defining AI &mdash; 2026
+  </footer>
+
+</body>
+</html>
